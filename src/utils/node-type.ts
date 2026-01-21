@@ -339,8 +339,12 @@ export const NODE_TYPES = {
       },
     },
     outputs: {
-      output: {
+      sum: {
         name: "x + y",
+        type: "number",
+      },
+      dif: {
+        name: "x - y",
         type: "number",
       },
     },

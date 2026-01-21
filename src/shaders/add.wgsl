@@ -1,5 +1,6 @@
 fn main(
     @builtin(global_invocation_id) id: vec3u,
 ) {
-    output[index] = x + y;
+    sum[index] = x + y;
+    dif[index] = x - y;
 }
