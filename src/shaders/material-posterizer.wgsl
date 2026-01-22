@@ -6,7 +6,10 @@ const B = 0.17;//104.05/255;
 
 
 fn main(@builtin(global_invocation_id) id: vec3<u32>) {
-    let l = dot(input, luma);
+
+    let in = input * sensitivity;
+
+    let l = dot(in, luma);
     var out = vec3f(0.0);
 
     if( l >= A && l < B ){

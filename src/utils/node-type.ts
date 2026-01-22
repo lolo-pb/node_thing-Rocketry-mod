@@ -52,6 +52,14 @@ export const NODE_TYPES = {
         name: "input",
         type: "color",
       },
+      sensitivity: {
+        name: "sensitivity",
+        type: "number",
+        default: 1.0,
+        min: 0.0,
+        max: 2.5,
+        step: 0.01,
+      },
     },
     outputs: {
       output: {
