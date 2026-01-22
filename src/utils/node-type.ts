@@ -38,8 +38,28 @@ import perlinNoiseShader from "@/shaders/perlin-noise.wgsl";
 import voronoiNoiseShader from "@/shaders/voronoi-noise.wgsl";
 import voronoiShader from "@/shaders/voronoi.wgsl";
 import kuwaharaFilterShader from "@/shaders/kuwahara-filter.wgsl";
+import materialPosterizerShader from "@/shaders/material-posterizer.wgsl";
 
 export const NODE_TYPES = {
+  material_poster: {
+    name: "Material Posterizer",
+    category: "material",
+    tooltip: "joe mama",
+    shader: materialPosterizerShader,
+    inputs: {
+      input: {
+        name: "input",
+        type: "color",
+      },
+    },
+    outputs: {
+      output: {
+        name: "out",
+        type: "number",
+      },
+    },
+    parameters: {},
+  },
   // Input & output ///////////////////////////////
   __input_image: {
     name: "Image",
