@@ -55,7 +55,7 @@ export const NODE_TYPES = {
     outputs: {
       output: {
         name: "out",
-        type: "number",
+        type: "color",
       },
     },
     parameters: {},
