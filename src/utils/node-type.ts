@@ -40,6 +40,7 @@ import voronoiShader from "@/shaders/voronoi.wgsl";
 import kuwaharaFilterShader from "@/shaders/kuwahara-filter.wgsl";
 
 import materialPosterizerShader from "@/shaders/material-posterizer.wgsl";
+import houghCircleTransformShader from "@/shaders/hough-circle-transform.wgsl";
 
 export const NODE_TYPES = {
   material_poster: {
@@ -65,6 +66,42 @@ export const NODE_TYPES = {
       output: {
         name: "out",
         type: "color",
+      },
+    },
+    parameters: {},
+  },
+  houghTransform: {
+    name: "Hough circle transform",
+    category: "material",
+    tooltip: "ligma",
+    shader: houghCircleTransformShader,
+    inputs: {
+      input: {
+        name: "input",
+        type: "color",
+      },
+      radius: {
+        name: "radius",
+        type: "number",
+        default: 1.0,
+        min: 0.0,
+        max: 10.0,
+        step: 1.0,
+      },
+      range: {
+        // TODO : check ranges
+        name: "range",
+        type: "number",
+        default: 0.1,
+        min: 0.0,
+        max: 2.0,
+        step: 0.01,
+      },
+    },
+    outputs: {
+      output: {
+        name: "out",
+        type: "number",
       },
     },
     parameters: {},
