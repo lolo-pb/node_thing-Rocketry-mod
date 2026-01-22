@@ -38,6 +38,7 @@ import perlinNoiseShader from "@/shaders/perlin-noise.wgsl";
 import voronoiNoiseShader from "@/shaders/voronoi-noise.wgsl";
 import voronoiShader from "@/shaders/voronoi.wgsl";
 import kuwaharaFilterShader from "@/shaders/kuwahara-filter.wgsl";
+
 import materialPosterizerShader from "@/shaders/material-posterizer.wgsl";
 
 export const NODE_TYPES = {
@@ -363,8 +364,12 @@ export const NODE_TYPES = {
         name: "x + y",
         type: "number",
       },
-      dif: {
+      sub: {
         name: "x - y",
+        type: "number",
+      },
+      dif: {
+        name: "|x - y|",
         type: "number",
       },
     },
