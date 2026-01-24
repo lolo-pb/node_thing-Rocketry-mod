@@ -41,6 +41,8 @@ import kuwaharaFilterShader from "@/shaders/kuwahara-filter.wgsl";
 
 import materialPosterizerShader from "@/shaders/material-posterizer.wgsl";
 import houghCircleTransformShader from "@/shaders/hough-circle-transform.wgsl";
+invertShader;
+import invertShader from "@/shaders/invert.wgsl";
 
 export const NODE_TYPES = {
   material_poster: {
@@ -85,7 +87,7 @@ export const NODE_TYPES = {
         type: "number",
         default: 1.0,
         min: 0.0,
-        max: 10.0,
+        max: 20.0,
         step: 1.0,
       },
       range: {
@@ -94,8 +96,27 @@ export const NODE_TYPES = {
         type: "number",
         default: 0.1,
         min: 0.0,
-        max: 2.0,
-        step: 0.01,
+        max: 5.0,
+        step: 0.25,
+      },
+    },
+    outputs: {
+      output: {
+        name: "out",
+        type: "number",
+      },
+    },
+    parameters: {},
+  },
+  invert: {
+    name: "Invert",
+    category: "material",
+    tooltip: "Takes a number, outputs 1 - that.",
+    shader: invertShader,
+    inputs: {
+      input: {
+        name: "input",
+        type: "number",
       },
     },
     outputs: {

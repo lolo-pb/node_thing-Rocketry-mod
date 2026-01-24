@@ -16,7 +16,6 @@ fn main(@builtin(global_invocation_id) id: vec3<u32>) {
             let x = clamp(i32(id.x) + dx, 0, i32(u.width) - 1);
             let y = clamp(i32(id.y) + dy, 0, i32(u.height) - 1);
 
-
             let dist_sq = f32(dx * dx + dy * dy);
             let inner = (radius - range) * (radius - range);
             let outer = (radius + range) * (radius + range);
