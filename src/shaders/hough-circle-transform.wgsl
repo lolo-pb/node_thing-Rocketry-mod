@@ -1,7 +1,3 @@
-
-//need : radius{pixeles}, range[0.1;1.0]?
-// el input tiene que ser number asi toma el luminance
-
 fn main(@builtin(global_invocation_id) id: vec3<u32>) {
     let R = i32(floor(radius));
 
