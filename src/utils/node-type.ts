@@ -39,10 +39,10 @@ import voronoiNoiseShader from "@/shaders/voronoi-noise.wgsl";
 import voronoiShader from "@/shaders/voronoi.wgsl";
 import kuwaharaFilterShader from "@/shaders/kuwahara-filter.wgsl";
 
-import materialPosterizerShader from "@/shaders/material-posterizer.wgsl";
-import houghCircleTransformShader from "@/shaders/hough-circle-transform.wgsl";
-invertShader;
+import materialPosterizerShader from "@/shaders/materials/material-posterizer.wgsl";
+import houghCircleTransformShader from "@/shaders/materials/hough-circle-transform.wgsl";
 import invertShader from "@/shaders/invert.wgsl";
+import claheShader from "@/shaders/materials/clahe.wgsl";
 
 export const NODE_TYPES = {
   material_poster: {
@@ -104,6 +104,34 @@ export const NODE_TYPES = {
       output: {
         name: "out",
         type: "number",
+      },
+    },
+    parameters: {},
+  },
+  clahe: {
+    name: "CLAHE",
+    category: "material",
+    tooltip:
+      "Contrast Limited Adaptive Histogram Equalization (approx). Equivalent intent to OpenCV createCLAHE(clipLimit=2, tileGridSize=(10,10)).",
+    shader: claheShader,
+    inputs: {
+      input: {
+        name: "input",
+        type: "color",
+      },
+      clip_limit: {
+        name: "clip_limit",
+        type: "number",
+        min: 0.1,
+        max: 10.0,
+        step: 0.1,
+        default: 2.0,
+      },
+    },
+    outputs: {
+      output: {
+        name: "out",
+        type: "color",
       },
     },
     parameters: {},
