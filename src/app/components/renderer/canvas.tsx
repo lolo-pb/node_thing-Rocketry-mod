@@ -21,6 +21,7 @@ import { useWebGPUContext } from "./use-webgpu-context";
 import { useConfigStore } from "@/store/config.store";
 import { zip } from "@/utils/zip";
 import { expandGroups } from "./pipeline";
+import { Button } from "@/ui/button";
 
 const SAMPLER_DESC: GPUSamplerDescriptor = {
   magFilter: "linear",
@@ -257,25 +258,23 @@ export function Canvas() {
   ]);
 
   return (
-    // 1. The Wrapper: "relative" allows us to position children absolutely inside it
-    <div className="relative w-full h-full">
-      {/* 2. The Button: "absolute" floats it on top. z-10 ensures it's clickable. */}
-      <button
-        onClick={manualRender}
-        className="absolute top-4 left-4 z-10 px-4 py-2 bg-white text-black font-bold rounded shadow-lg hover:bg-gray-200"
-      >
-        Render Frame
-      </button>
+    <div className="flex flex-col w-full h-full">
+      <div className="relative flex-1 overflow-hidden">
+        <canvas
+          ref={(ref) => setCanvas(ref)}
+          id="main-canvas"
+          className={cn("bg-pattern-squares bg-neutral-950 text-neutral-900", {
+            "[image-rendering:pixelated]": view.zoom > 1,
+          })}
+          {...canvasProperties}
+        />
+      </div>
 
-      {/* 3. The Canvas: Your original canvas code */}
-      <canvas
-        ref={(ref) => setCanvas(ref)}
-        id="main-canvas"
-        className={cn("bg-pattern-squares bg-neutral-950 text-neutral-900", {
-          "[image-rendering:pixelated]": view.zoom > 1,
-        })}
-        {...canvasProperties}
-      />
+      <div className="p-2 ">
+        <Button icon variant="ghost" onClick={manualRender}>
+          Render Frame
+        </Button>
+      </div>
     </div>
   );
 }
