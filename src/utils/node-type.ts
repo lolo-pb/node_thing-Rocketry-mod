@@ -10,6 +10,7 @@ import constantShader from "@/shaders/constant.wgsl";
 import contrastShader from "@/shaders/contrast.wgsl";
 import displaceShader from "@/shaders/displace.wgsl";
 import edgeTangentFlowShader from "@/shaders/edge-tangent-flow.wgsl";
+import erosionShader from "@/shaders/erosion.wgsl";
 import exposureShader from "@/shaders/exposure.wgsl";
 import splitChannelsShader from "@/shaders/extract-channel.wgsl";
 import fractShader from "@/shaders/fract.wgsl";
@@ -151,7 +152,7 @@ export const NODE_TYPES = {
         default: 0.1,
         min: 0.0,
         max: 1.0,
-        step: 0.005,
+        step: 0.0001,
       },
       fiber_threshold: {
         name: "Fiber threshold",
@@ -675,6 +676,34 @@ export const NODE_TYPES = {
         max: 50,
         step: 1,
         default: 5,
+      },
+    },
+    outputs: {
+      output: {
+        name: "Output",
+        type: "color",
+      },
+    },
+    parameters: {},
+  },
+  erosion: {
+    name: "Erosion",
+    category: "Filter",
+    tooltip:
+      "Replaces each color channel with the minimum value in a square neighborhood. This shrinks bright regions and expands dark regions.",
+    shader: erosionShader,
+    inputs: {
+      input: {
+        name: "Input",
+        type: "color",
+      },
+      radius: {
+        name: "Radius",
+        type: "number",
+        min: 1,
+        max: 20,
+        step: 1,
+        default: 1,
       },
     },
     outputs: {
