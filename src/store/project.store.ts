@@ -170,10 +170,15 @@ export const useProjectStore = create(
 
       setCanvasSize: (width: number, height: number) => {
         const state = get();
+        const resizedLayer = modifyLayer(state, () => ({
+          position: { x: 0, y: 0 },
+          size: { width, height },
+        }));
         set(
           withHistory(
             state,
             {
+              ...resizedLayer,
               properties: {
                 ...state.properties,
                 canvas: { width, height },

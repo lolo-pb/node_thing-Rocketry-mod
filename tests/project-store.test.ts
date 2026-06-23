@@ -36,4 +36,18 @@ describe("project store graph editing", () => {
     });
     expect(() => RenderPipeline.create(layer, NODE_TYPES)).not.toThrow();
   });
+
+  it("fits the active layer to the canvas when resizing the canvas", () => {
+    const store = useProjectStore.getState();
+    store.setLayerBounds(50, 60, 320, 240);
+
+    useProjectStore.getState().setCanvasSize(800, 600);
+
+    const state = useProjectStore.getState();
+    expect(state.properties.canvas).toEqual({ width: 800, height: 600 });
+    expect(state.layers[state.currentLayer]).toMatchObject({
+      position: { x: 0, y: 0 },
+      size: { width: 800, height: 600 },
+    });
+  });
 });
