@@ -41,6 +41,7 @@ import kuwaharaFilterShader from "@/shaders/kuwahara-filter.wgsl";
 
 import materialPosterizerShader from "@/shaders/materials/material-posterizer.wgsl";
 import materialPosterizerMk2Shader from "@/shaders/materials/material-posterizer-mk2.wgsl";
+import materialPosterizerMk3Shader from "@/shaders/materials/material-posterizer-mk3.wgsl";
 import houghCircleTransformShader from "@/shaders/materials/hough-circle-transform.wgsl";
 import invertShader from "@/shaders/invert.wgsl";
 import claheShader from "@/shaders/materials/clahe.wgsl";
@@ -122,6 +123,42 @@ export const NODE_TYPES = {
         default: 0.01,
         min: 0.0,
         max: 0.1,
+        step: 0.005,
+      },
+    },
+    outputs: {
+      output: {
+        name: "Mask",
+        type: "color",
+      },
+    },
+    parameters: {},
+  },
+  material_poster_mk3: {
+    name: "Material Posterizer Mk3",
+    category: "material",
+    tooltip:
+      "Segments absolute luminance with two thresholds. Dark pixels become blue pores, middle pixels become green resin, and bright pixels become red fibers.",
+    shader: materialPosterizerMk3Shader,
+    inputs: {
+      input: {
+        name: "Input",
+        type: "color",
+      },
+      pore_threshold: {
+        name: "Pore threshold",
+        type: "number",
+        default: 0.1,
+        min: 0.0,
+        max: 1.0,
+        step: 0.005,
+      },
+      fiber_threshold: {
+        name: "Fiber threshold",
+        type: "number",
+        default: 0.4,
+        min: 0.0,
+        max: 1.0,
         step: 0.005,
       },
     },
