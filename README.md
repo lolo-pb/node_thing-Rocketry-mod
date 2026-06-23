@@ -1,30 +1,46 @@
 # node thing
 
-This is a Next.js project intended to run in browser as well as an Electron app.
+A local node-based image editor powered by WebGPU compute shaders.
 
-## Building (dev)
+The app has no accounts, marketplace, cloud storage, sharing, or remote
+services. Projects and imported images stay on the local machine.
 
-First, run the development server:
+## Development
 
 ```bash
+pnpm install
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-To run the Electron app:
+## Verification
 
 ```bash
-pnpm build:electron
-pnpm start:electron
-```
-
-```windows
+pnpm exec jest --runInBand
+pnpm lint
 pnpm build
-pnpm exec electron .\electron\dist\main.js
+pnpm electron:build
 ```
 
+## Electron
 
-# Building (production)
+Build the web app and Electron entry points:
 
-i have no fucking clue lmao
+```bash
+pnpm build
+pnpm electron:build
+pnpm exec electron build/main.js
+```
+
+## Projects
+
+Use the File menu to save and open local ZIP project files. Projects include
+the node graph and imported image assets.
+
+Only shaders defined in `src/utils/node-type.ts` are supported. Projects that
+contain old custom or marketplace shader nodes are rejected without changing
+the current project.
+
+This cleanup uses new local persistence keys, so state saved by older versions
+is not restored.

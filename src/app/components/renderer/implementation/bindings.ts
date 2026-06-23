@@ -1,6 +1,7 @@
-import { UniformDefinition } from "@/schemas/node.schema";
+import { NodeType, UniformDefinition } from "@/schemas/node.schema";
 import type { RenderPass, RenderPipeline } from "../pipeline";
-import { NodeTypes } from "@/store/project.types";
+
+type NodeTypes = Record<string, NodeType>;
 
 export type DummyBuffer = {
   buffer: GPUBuffer;

@@ -1,13 +1,7 @@
-"uae client";
+"use client";
 
 import cn from "classnames";
-import {
-  CSSProperties,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { CSSProperties, useLayoutEffect, useMemo, useRef } from "react";
 
 import { useConfigStore } from "@/store/config.store";
 import { Rectangle } from "@/utils/point";

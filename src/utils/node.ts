@@ -91,7 +91,7 @@ export function createGroup(
   const restEdges = graph.edges.filter((e) => !s(e.source) && !s(e.target));
 
   const inputs = inputEdges
-    .map((e, i) => {
+    .map((e) => {
       const target = selectedNodes.find((n) => n.id === e.target);
       if (!target) {
         console.warn(e);
@@ -120,7 +120,7 @@ export function createGroup(
     .filter((x) => x !== null);
 
   const outputs = outputEdges
-    .map((e, i) => {
+    .map((e) => {
       const source = selectedNodes.find((n) => n.id === e.source);
       if (!source) {
         console.warn(e);

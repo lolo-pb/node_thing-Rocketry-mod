@@ -1,20 +1,15 @@
 import { Edge, EdgeChange, Node, NodeChange } from "@xyflow/react";
 import { nanoid } from "nanoid";
 
-import { NodeType, ShaderNode } from "@/schemas/node.schema";
+import { ShaderNode } from "@/schemas/node.schema";
 import {
   Project,
   Layer,
-  NodeTypeDescriptor,
-  HandleDescriptor,
-  NodeTypes,
   StoredProject,
-  NodeTypeDependency,
   isShader,
   Graph,
   isGroup,
 } from "./project.types";
-import { NODE_TYPES } from "@/utils/node-type";
 import { Command } from "./types/command";
 import { diff, revertChangeset } from "json-diff-ts";
 
@@ -31,41 +26,23 @@ const initialEdges: Edge[] = [];
 const initialSize = { width: 1920, height: 1080 };
 
 export function prepareProjectForExport(project: Project): StoredProject {
+  const {
+    layers,
+    currentLayer,
+    currentGroup,
+    properties,
+    projectName,
+    history,
+    done,
+  } = project;
   return {
-    ...project,
-    nodeTypes: { custom: project.nodeTypes.custom },
-    externalDependencies: {
-      nodeTypes: getNodeTypeDependencies(project),
-    },
-  };
-}
-
-function getNodeTypeDependencies(project: Project): NodeTypeDependency[] {
-  const projectNodeTypes = new Set(
-    project.layers
-      .flatMap((layer) =>
-        layer.nodes.map((node) => (isShader(node) ? node.data.type : "")),
-      )
-      .filter((type) => Object.hasOwn(project.nodeTypes.external, type))
-      .map((type) => [type, project.nodeTypes.external[type]] as const),
-  );
-
-  return [...projectNodeTypes].map(([id, type]) => ({
-    id,
-    name: type.name,
-    externalId: type.externalShaderId ?? "",
-  }));
-}
-
-export function getAllNodeTypes(nodeTypes: {
-  default: NodeTypes;
-  custom: NodeTypes;
-  external: NodeTypes;
-}) {
-  return {
-    ...nodeTypes.default,
-    ...nodeTypes.custom,
-    ...nodeTypes.external,
+    layers,
+    currentLayer,
+    currentGroup,
+    properties,
+    projectName,
+    history,
+    done,
   };
 }
 
@@ -79,14 +56,15 @@ export function modifyNode(
     if (!node || !isShader(node)) return {};
 
     return {
-      nodes: [
-        ...nodes.filter((n) => n.id !== id),
-        {
-          ...node,
-          ...updater(node),
-          id: node.id,
-        },
-      ],
+      nodes: nodes.map((current) =>
+        current.id === id
+          ? {
+              ...node,
+              ...updater(node),
+              id: node.id,
+            }
+          : current,
+      ),
     };
   });
 }
@@ -141,40 +119,6 @@ export function modifyLayer(
   };
 }
 
-export function updateNodeType(
-  name: string,
-  desc: NodeTypeDescriptor,
-): (state: Project) => Partial<Project> {
-  return ({ nodeTypes }: Project) => {
-    const inputs = createHandles(desc.inputs);
-    const outputs = createHandles(desc.outputs);
-
-    const newNodeType: NodeType = {
-      name: desc.name,
-      category: "Custom",
-      shader: desc.code,
-      inputs,
-      outputs,
-      parameters: {},
-    };
-
-    return {
-      nodeTypes: {
-        ...nodeTypes,
-        custom: { ...nodeTypes.custom, [name]: newNodeType },
-      },
-    };
-  };
-}
-
-export function createHandles(desc: HandleDescriptor[]) {
-  const handles: NodeType["inputs" | "outputs"] = {};
-  for (const { name, display, type } of desc) {
-    handles[name] = { name: display, type };
-  }
-  return handles;
-}
-
 export function createLayer(
   name: string,
   size = { width: 1920, height: 1080 },
@@ -200,11 +144,6 @@ export function createInitialState(): Project {
     currentGroup: [],
 
     properties: { canvas: initialSize },
-    nodeTypes: {
-      default: NODE_TYPES,
-      custom: {},
-      external: {},
-    },
     projectName: "Untitled Project",
 
     history: [],
@@ -216,10 +155,6 @@ export function mergeProject(imported: unknown, current: Project): Project {
   return {
     ...current,
     ...(imported as Project),
-    nodeTypes: {
-      ...current.nodeTypes,
-      custom: (imported as Project).nodeTypes.custom,
-    },
     properties: {
       ...current.properties,
       ...(imported as Project).properties,
@@ -243,24 +178,7 @@ export function withHistory(
     collapse: false,
   },
 ) {
-  const {
-    history,
-    done,
-    currentRoomId,
-    yjsDoc,
-    realtimeChannel,
-    awareness,
-    collaborationEnabled,
-    connectedUsers,
-    ...cleanState
-  } = state as Project & {
-    currentRoomId?: string | null;
-    yjsDoc?: unknown;
-    realtimeChannel?: unknown;
-    awareness?: unknown;
-    collaborationEnabled?: boolean;
-    connectedUsers?: unknown[];
-  };
+  const { history, done, ...cleanState } = state;
   const serializable = JSON.parse(JSON.stringify(cleanState));
   const fullNewState = { ...serializable, ...newState };
 

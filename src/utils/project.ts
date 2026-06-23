@@ -5,7 +5,8 @@ import { useAssetStore } from "@/store/asset.store";
 import { useProjectStore } from "@/store/project.store";
 import { openFile, saveFile } from "./file";
 import { getImageType } from "./image";
-import { Project, ProjectDependencies } from "@/store/project.types";
+import { GroupNode, isGroup, isShader, Project } from "@/store/project.types";
+import { NODE_TYPES } from "./node-type";
 
 export async function importProjectFromFile() {
   const file = await openFile(["application/zip"]);
@@ -59,26 +60,24 @@ export async function importProject(file: File) {
     useProjectStore.getState().importProject(project);
   }
 
-  const missingDependencies = getMissingDependencies(project);
-  if (missingDependencies.length) {
-    // Return the array of missing deps and the import callback, so the caller
-    // can decide what to do
-    return { missingDependencies, doImport };
-  } else {
-    await doImport();
-  }
+  const unsupportedNodeTypes = getUnsupportedNodeTypes(project);
+  if (unsupportedNodeTypes.length) return { unsupportedNodeTypes };
+
+  await doImport();
 }
 
 export type ImportResult = Awaited<ReturnType<typeof importProject>>;
 
-function getMissingDependencies(project: Project & ProjectDependencies) {
-  const externalNodeTypes = useProjectStore.getState().nodeTypes.external;
+export function getUnsupportedNodeTypes(project: Project) {
+  const visit = (nodes: Project["layers"][number]["nodes"]): string[] =>
+    nodes.flatMap((node) => {
+      if (isGroup(node)) return visit((node as GroupNode).data.nodes);
+      if (isShader(node) && !Object.hasOwn(NODE_TYPES, node.data.type))
+        return [node.data.type];
+      return [];
+    });
 
-  return project.externalDependencies.nodeTypes.filter(
-    (dep) =>
-      !Object.hasOwn(externalNodeTypes, dep.id) ||
-      externalNodeTypes[dep.id].externalShaderId !== dep.externalId,
-  );
+  return [...new Set(project.layers.flatMap((layer) => visit(layer.nodes)))];
 }
 
 function getAssetFilenames(zip: JSZip) {
@@ -113,5 +112,5 @@ async function getProject(zip: JSZip) {
   const project = JSON.parse(json);
 
   // TODO add zod validation
-  return project as Project & ProjectDependencies;
+  return project as Project;
 }

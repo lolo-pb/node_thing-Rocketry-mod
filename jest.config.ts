@@ -12,6 +12,7 @@ const config: Config = {
     "^@/(.*)$": "<rootDir>/$1",
   },
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
+  modulePathIgnorePatterns: ["<rootDir>/.next/"],
   transform: {
     "\\.wgsl$": "@glen/jest-raw-loader",
   },

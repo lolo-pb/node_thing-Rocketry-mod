@@ -13,13 +13,7 @@ import { Input } from "@/ui/input";
 export function RenderGroupNode(props: NodeProps<GroupNode>) {
   const openGroup = useProjectStore((s) => s.openGroup);
   const renameGroup = useProjectStore((s) => s.renameGroup);
-  const connectedUsers = useProjectStore((s) => s.connectedUsers);
-
   const [editingName, setEditingName] = useState(false);
-
-  const usersOnThisNode = (connectedUsers || []).filter(
-    (user) => user.selectedNode === props.id,
-  );
 
   const nodes = props.data.nodes;
   const inputs = nodes
@@ -37,28 +31,6 @@ export function RenderGroupNode(props: NodeProps<GroupNode>) {
   return (
     <ShaderNodeContainer {...props}>
       <div className="text-xs/5 px-3 py-1.5 font-bold border-b border-white/15 bg-clip-padding rounded-t-[11px] bg-amber-400/15">
-        {usersOnThisNode.length > 0 && (
-          <div className="absolute -top-2 -right-2 flex gap-1">
-            {usersOnThisNode.slice(0, 2).map((user) => (
-              <div
-                key={user.id}
-                className="w-6 h-6 rounded-full border-2 border-white bg-neutral-800 flex items-center justify-center text-xs font-bold"
-                style={{ borderColor: user.color }}
-                title={user.name}
-              >
-                {user.avatar ? (
-                  <img
-                    src={user.avatar}
-                    alt={user.name}
-                    className="w-full h-full rounded-full"
-                  />
-                ) : (
-                  user.name[0]?.toUpperCase()
-                )}
-              </div>
-            ))}
-          </div>
-        )}
         <div className="flex items-center gap-1 min-w-40">
           {editingName ? (
             <form

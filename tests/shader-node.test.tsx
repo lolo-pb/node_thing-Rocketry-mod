@@ -4,13 +4,9 @@ import { RenderShaderNode } from "@/app/components/workspace/shader-node/index";
 import { createNode } from "@/utils/node";
 
 import { mockNodeTypes } from "./node.mock";
-import { NodeType } from "@/schemas/node.schema";
-
-type NodeTypes = Record<string, NodeType>;
 jest.mock("@/src/store/project.store", () => ({
   useProjectStore: jest.fn((selector) =>
     selector({
-      nodeTypes: { default: mockNodeTypes },
       layers: {
         0: { nodes: [], edges: [] },
       },
@@ -21,19 +17,10 @@ jest.mock("@/src/store/project.store", () => ({
       addNode: jest.fn(),
     }),
   ),
-  getAllNodeTypes: jest.fn(
-    (nodeTypes: {
-      default: NodeTypes;
-      custom: NodeTypes;
-      external: NodeTypes;
-    }) => {
-      return {
-        ...nodeTypes.default,
-        ...nodeTypes.custom,
-        ...nodeTypes.external,
-      };
-    },
-  ),
+}));
+
+jest.mock("@/src/utils/use-node-types", () => ({
+  useNodeTypes: () => mockNodeTypes,
 }));
 
 describe("ShaderNode component", () => {

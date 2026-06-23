@@ -13,30 +13,13 @@ const initialState: AssetsState = { images: {} };
 export const useAssetStore = create(
   persist(
     combine(initialState, (set) => ({
-      addImage: async (name: string, data: ImageAsset, skipSync = false) => {
+      addImage: (name: string, data: ImageAsset) => {
         set(({ images }) => ({
           images: {
             ...images,
             [name]: data,
           },
         }));
-
-        if (skipSync) return;
-
-        const { useProjectStore } = await import("./project.store");
-        const { currentRoomId, collaborationEnabled, yjsDoc } =
-          useProjectStore.getState();
-        if (collaborationEnabled && currentRoomId && yjsDoc) {
-          const { uploadAsset } = await import(
-            "@/lib/collaboration/asset-sync"
-          );
-          await uploadAsset(currentRoomId, name, data);
-
-          const yAssetRefs = yjsDoc.getMap("assetRefs");
-          yjsDoc.transact(() => {
-            yAssetRefs.set(name, true);
-          }, yjsDoc);
-        }
       },
 
       removeImage: (name: string) =>
@@ -46,7 +29,7 @@ export const useAssetStore = create(
       clear: () => set(initialState),
     })),
     {
-      name: "asset-storage",
+      name: "asset-storage-v2",
       storage: opfsStorage,
       skipHydration: true,
       onRehydrateStorage: () => (_, err) => {

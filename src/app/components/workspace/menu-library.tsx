@@ -1,6 +1,5 @@
 import * as Accordion from "@radix-ui/react-accordion";
 import { Fragment } from "react";
-import { LuFilePlus2 } from "react-icons/lu";
 
 import { NodeType } from "@/schemas/node.schema";
 import { useProjectStore } from "@/store/project.store";
@@ -9,9 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/ui/accordion";
-import { Button } from "@/ui/button";
 import { useNodeTypes } from "@/utils/use-node-types";
-import { ShaderEditor } from "./shader-editor";
 import { RenderShaderNode } from "./shader-node";
 
 type ShaderListProps = {
@@ -92,17 +89,6 @@ export function MenuLibrary() {
             </Fragment>
           ))}
         </Accordion.Root>
-      </div>
-
-      <div className="p-2 flex flex-col gap-2">
-        <ShaderEditor
-          trigger={
-            <Button variant="outline">
-              <LuFilePlus2 />
-              New Shader
-            </Button>
-          }
-        />
       </div>
     </div>
   );

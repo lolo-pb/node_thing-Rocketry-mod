@@ -5,161 +5,77 @@ import {
   mergeProject,
   prepareProjectForExport,
 } from "@/store/project.actions";
-import { NodeTypes } from "@/store/project.types";
 import { createNode } from "@/utils/node";
 import { NODE_TYPES } from "@/utils/node-type";
-
-const nodeTypes: NodeTypes = NODE_TYPES;
-const customNodeTypes: NodeTypes = {
-  test: {
-    name: "Test node",
-    category: "Custom",
-    shader: "",
-    inputs: {},
-    outputs: {},
-    parameters: {},
-    externalShaderId: "test_id",
-  },
-};
+import { getUnsupportedNodeTypes } from "@/utils/project";
 
 describe("createLayer", () => {
   it("includes an output node", () => {
-    const newLayer = createLayer("New layer");
+    const layer = createLayer("New layer");
 
-    expect(newLayer.nodes.length).toBeGreaterThan(0);
-    expect((newLayer.nodes[0] as ShaderNode).data.type).toBe("__output");
-    expect(newLayer.nodes[0].id).toBe("__output");
-  });
-
-  it("includes only valid edges", () => {
-    const newLayer = createLayer("New layer");
-
-    for (const edge of newLayer.edges) {
-      const source = newLayer.nodes.find((node) => node.id === edge.source);
-      const target = newLayer.nodes.find((node) => node.id === edge.target);
-
-      expect(source).toBeDefined();
-      expect(target).toBeDefined();
-
-      const sourceType = nodeTypes[(source as ShaderNode).data.type];
-      const targetType = nodeTypes[(target as ShaderNode).data.type];
-      expect(sourceType.inputs).toHaveProperty(edge.sourceHandle ?? "");
-      expect(targetType.inputs).toHaveProperty(edge.targetHandle ?? "");
-    }
+    expect(layer.nodes.length).toBeGreaterThan(0);
+    expect((layer.nodes[0] as ShaderNode).data.type).toBe("__output");
+    expect(layer.nodes[0].id).toBe("__output");
   });
 });
 
 describe("createInitialState", () => {
-  it("contains at least one layer", () => {
+  it("contains one local layer and no dynamic node registry", () => {
     const project = createInitialState();
 
-    expect(project.layers[0]).toBeDefined();
-  });
-
-  it("contains default node types", () => {
-    const project = createInitialState();
-
-    expect(project.nodeTypes.default).toBe(NODE_TYPES);
-  });
-
-  it("contains no custom node types", () => {
-    const project = createInitialState();
-
-    expect(project.nodeTypes.custom).toEqual({});
-  });
-
-  it("contains no external node types", () => {
-    const project = createInitialState();
-
-    expect(project.nodeTypes.external).toEqual({});
+    expect(project.layers).toHaveLength(1);
+    expect(project).not.toHaveProperty("nodeTypes");
   });
 });
 
 describe("prepareProjectForExport", () => {
-  const project = createInitialState();
-  project.nodeTypes.custom = customNodeTypes;
-  project.nodeTypes.external = customNodeTypes;
+  it("exports only project data", () => {
+    const project = createInitialState();
+    const exported = prepareProjectForExport(project);
 
-  const testExternalNode = createNode(
-    "test",
-    { x: 0, y: 0 },
-    customNodeTypes,
-    {},
-  );
-  project.layers[0].nodes.push(testExternalNode);
-
-  it("contains the same layer data", () => {
-    const projectExport = prepareProjectForExport(project);
-
-    expect(projectExport.layers).toEqual(project.layers);
-  });
-
-  it("exports custom nodes", () => {
-    const projectExport = prepareProjectForExport(project);
-
-    expect(projectExport.nodeTypes).toBeDefined();
-    expect(projectExport.nodeTypes?.custom).toEqual(customNodeTypes);
-  });
-
-  it("does not export default nodes", () => {
-    const projectExport = prepareProjectForExport(project);
-
-    expect(projectExport.nodeTypes).toBeDefined();
-    expect(projectExport.nodeTypes?.default).toBeUndefined();
-  });
-
-  it("does not export external nodes", () => {
-    const projectExport = prepareProjectForExport(project);
-
-    expect(projectExport.nodeTypes).toBeDefined();
-    expect(projectExport.nodeTypes?.external).toBeUndefined();
-  });
-
-  it("exports external dependencies", () => {
-    const projectExport = prepareProjectForExport(project);
-
-    expect(projectExport.externalDependencies).toBeDefined();
-    expect(projectExport.externalDependencies?.nodeTypes[0]).toBeDefined();
-    expect(projectExport.externalDependencies?.nodeTypes[0]).toEqual({
-      name: "Test node",
-      id: "test",
-      externalId: "test_id",
-    });
+    expect(exported).toEqual(project);
+    expect(exported).not.toHaveProperty("nodeTypes");
   });
 });
 
 describe("mergeProject", () => {
-  const projectBase = createInitialState();
-  const projectImport = createInitialState();
-  projectImport.layers[0].size = { width: 100, height: 100 };
-  projectImport.layers[0].nodes.push(
-    createNode("mix", { x: 0, y: 0 }, NODE_TYPES, {}),
-  );
-  projectImport.nodeTypes.custom = customNodeTypes;
-  projectImport.nodeTypes.default = customNodeTypes;
-  projectImport.nodeTypes.external = customNodeTypes;
+  it("uses imported layers while preserving current defaults", () => {
+    const current = createInitialState();
+    const imported = createInitialState();
+    imported.layers[0].size = { width: 100, height: 100 };
+    imported.layers[0].nodes.push(
+      createNode("mix", { x: 0, y: 0 }, NODE_TYPES, {}),
+    );
 
-  it("overrides layers with imported project", () => {
-    const merged = mergeProject(projectImport, projectBase);
+    const merged = mergeProject(imported, current);
 
-    expect(merged.layers).toEqual(projectImport.layers);
+    expect(merged.layers).toEqual(imported.layers);
+    expect(merged.properties).toEqual(imported.properties);
+  });
+});
+
+describe("getUnsupportedNodeTypes", () => {
+  it("accepts projects containing only hardcoded nodes", () => {
+    const project = createInitialState();
+    project.layers[0].nodes.push(
+      createNode("mix", { x: 0, y: 0 }, NODE_TYPES, {}),
+    );
+
+    expect(getUnsupportedNodeTypes(project)).toEqual([]);
   });
 
-  it("imports custom node types", () => {
-    const merged = mergeProject(projectImport, projectBase);
+  it("reports unknown nodes without changing the project", () => {
+    const project = createInitialState();
+    const unknown: ShaderNode = createNode(
+      "mix",
+      { x: 0, y: 0 },
+      NODE_TYPES,
+      {},
+    );
+    unknown.data.type = "custom_old_shader";
+    project.layers[0].nodes.push(unknown);
 
-    expect(merged.nodeTypes.custom).toEqual(projectImport.nodeTypes.custom);
-  });
-
-  it("does not import default node types", () => {
-    const merged = mergeProject(projectImport, projectBase);
-
-    expect(merged.nodeTypes.default).toEqual(projectBase.nodeTypes.default);
-  });
-
-  it("does not import external node types", () => {
-    const merged = mergeProject(projectImport, projectBase);
-
-    expect(merged.nodeTypes.external).toEqual(projectBase.nodeTypes.external);
+    expect(getUnsupportedNodeTypes(project)).toEqual(["custom_old_shader"]);
+    expect(project.layers[0].nodes).toContain(unknown);
   });
 });

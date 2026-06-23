@@ -16,12 +16,7 @@ export function Workspace() {
   const currentLayer = useProjectStore((s) => s.currentLayer);
   const currentGroup = useProjectStore((s) => s.currentGroup);
 
-  const loadNodeTypes = useProjectStore((state) => state.loadNodeTypes);
   const closeGroup = useProjectStore((s) => s.closeGroup);
-
-  useEffect(() => {
-    loadNodeTypes();
-  }, [loadNodeTypes]);
 
   const [storeHydrated, setStoreHydrated] = useState(false);
   useEffect(() => {

@@ -1,9 +1,6 @@
 import { NodeType } from "@/schemas/node.schema";
-import { getAllNodeTypes } from "@/store/project.actions";
-import { useProjectStore } from "@/store/project.store";
-import { useMemo } from "react";
+import { NODE_TYPES } from "@/utils/node-type";
 
 export function useNodeTypes(): Record<string, NodeType> {
-  const nodeTypes = useProjectStore((s) => s.nodeTypes);
-  return useMemo(() => getAllNodeTypes(nodeTypes), [nodeTypes]);
+  return NODE_TYPES;
 }

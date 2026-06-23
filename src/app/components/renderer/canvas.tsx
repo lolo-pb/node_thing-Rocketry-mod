@@ -1,13 +1,7 @@
 "use client";
 
 import cn from "classnames";
-import {
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useCallback,
-} from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 
 import { useAnimationStore } from "@/store/animation.store";
 import { useProjectStore } from "@/store/project.store";
@@ -21,7 +15,6 @@ import { useWebGPUContext } from "./use-webgpu-context";
 import { useConfigStore } from "@/store/config.store";
 import { zip } from "@/utils/zip";
 import { expandGroups } from "./pipeline";
-import { Button } from "@/ui/button";
 
 const SAMPLER_DESC: GPUSamplerDescriptor = {
   magFilter: "linear",
@@ -102,49 +95,6 @@ export function Canvas() {
 
   const lastFrameTime = useRef(performance.now());
   const lastFrameError = useRef(0);
-
-  ///LOLO weird stuff, probably nasty
-  const manualRender = useCallback(async () => {
-    // Guard: Ensure WebGPU is initialized before trying to draw
-    if (!canvas || !ctx || !device || !pipeline || !sampler) return;
-
-    let renderPipeline = zip(pipeline, flatLayers);
-    if (view.display !== "final-render") {
-      renderPipeline = renderPipeline.slice(0, currentLayer + 1);
-    }
-
-    const target = ctx.getCurrentTexture();
-    for (const [p, layer] of renderPipeline) {
-      if (p) {
-        render(
-          device,
-          p,
-          layer,
-          target,
-          textures,
-          sampler,
-          frameIndex.current,
-          elapsedTime.current,
-        );
-      }
-    }
-
-    // Finish the GPU commands
-    await device.queue.onSubmittedWorkDone();
-    console.log("Manual render complete");
-  }, [
-    canvas,
-    ctx,
-    device,
-    pipeline,
-    textures,
-    sampler,
-    flatLayers,
-    currentLayer,
-    view.display,
-  ]);
-  ///LOLO weird stuff end
-
   useEffect(() => {
     const cancel = () => {
       if (frameRequestHandle.current)
@@ -152,7 +102,7 @@ export function Canvas() {
     };
 
     const frame = () => {
-      //frameRequestHandle.current = requestAnimationFrame(renderFrame);
+      frameRequestHandle.current = requestAnimationFrame(renderFrame);
     };
 
     cancel();
@@ -181,7 +131,6 @@ export function Canvas() {
         const target = ctx.getCurrentTexture();
         for (const [pipeline, layer] of renderPipeline) {
           if (pipeline) {
-            console.log("----rendered");
             render(
               device,
               pipeline,
@@ -227,9 +176,7 @@ export function Canvas() {
 
     lastFrameTime.current = performance.now();
     cancel();
-    if (false) {
-      frame();
-    }
+    frame();
 
     return () => {
       cancel();
@@ -258,23 +205,13 @@ export function Canvas() {
   ]);
 
   return (
-    <div className="flex flex-col w-full h-full">
-      <div className="relative flex-1 overflow-hidden">
-        <canvas
-          ref={(ref) => setCanvas(ref)}
-          id="main-canvas"
-          className={cn("bg-pattern-squares bg-neutral-950 text-neutral-900", {
-            "[image-rendering:pixelated]": view.zoom > 1,
-          })}
-          {...canvasProperties}
-        />
-      </div>
-
-      <div className="p-2 ">
-        <Button icon variant="ghost" onClick={manualRender}>
-          Render Frame
-        </Button>
-      </div>
-    </div>
+    <canvas
+      ref={(ref) => setCanvas(ref)}
+      id="main-canvas"
+      className={cn("bg-pattern-squares bg-neutral-950 text-neutral-900", {
+        "[image-rendering:pixelated]": view.zoom > 1,
+      })}
+      {...canvasProperties}
+    />
   );
 }

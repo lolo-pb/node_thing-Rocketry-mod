@@ -1,5 +1,5 @@
 import { Background, ReactFlow, useReactFlow } from "@xyflow/react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { LuPlus } from "react-icons/lu";
 
 import { NodeData, NodeType } from "@/schemas/node.schema";
@@ -13,7 +13,6 @@ import {
 import { useNodeTypes } from "@/utils/use-node-types";
 import { RenderGroupNode } from "./group-node";
 import { RenderShaderNode } from "./shader-node";
-import { RemoteCursor } from "./remote-cursor";
 
 const nodeTypes = {
   RenderShaderNode,
@@ -30,112 +29,15 @@ export function Viewport() {
   const onEdgesChange = useProjectStore((s) => s.onEdgesChange);
   const onConnect = useProjectStore((s) => s.onConnect);
   const addNode = useProjectStore((s) => s.addNode);
-  const awareness = useProjectStore((s) => s.awareness);
   const addGroup = useProjectStore((s) => s.addGroup);
-  const connectedUsers = useProjectStore((s) => s.connectedUsers);
-
-  const [remoteCursors, setRemoteCursors] = useState<
-    Record<string, { x: number; y: number }>
-  >({});
-  const lastCursorUpdate = useRef(0);
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
 
   const [ctxMenuPosition, setCtxMenuPosition] = useState({ x: 0, y: 0 });
-  const { screenToFlowPosition, flowToScreenPosition } = useReactFlow();
+  const { screenToFlowPosition } = useReactFlow();
 
   const onContextMenu = (ev: React.MouseEvent) => {
     setCtxMenuPosition(screenToFlowPosition({ x: ev.clientX, y: ev.clientY }));
   };
-
-  const handleMouseMove = useCallback(
-    (ev: React.MouseEvent) => {
-      if (!awareness) return;
-
-      const now = Date.now();
-      if (now - lastCursorUpdate.current < 200) return;
-
-      lastCursorUpdate.current = now;
-
-      const flowPosition = screenToFlowPosition({
-        x: ev.clientX,
-        y: ev.clientY,
-      });
-
-      awareness.setLocalStateField("cursor", {
-        x: flowPosition.x,
-        y: flowPosition.y,
-        currentLayer,
-        currentGroup,
-      });
-    },
-    [awareness, screenToFlowPosition, currentLayer, currentGroup],
-  );
-
-  useEffect(() => {
-    if (!awareness) return;
-
-    const updateCursors = () => {
-      const states = awareness.getStates();
-      const cursors: Record<string, { x: number; y: number }> = {};
-      const localClientId = awareness.clientID;
-
-      states.forEach(
-        (
-          state: {
-            cursor?: {
-              x: number;
-              y: number;
-              currentLayer: number;
-              currentGroup: string[];
-            };
-          },
-          clientId: number,
-        ) => {
-          if (state.cursor && clientId !== localClientId) {
-            const sameLayer = state.cursor.currentLayer === currentLayer;
-            const sameGroup =
-              JSON.stringify(state.cursor.currentGroup) ===
-              JSON.stringify(currentGroup);
-
-            if (sameLayer && sameGroup) {
-              const screenPos = flowToScreenPosition({
-                x: state.cursor.x,
-                y: state.cursor.y,
-              });
-              cursors[String(clientId)] = screenPos;
-            }
-          }
-        },
-      );
-
-      setRemoteCursors(cursors);
-    };
-
-    awareness.on("change", updateCursors);
-    updateCursors();
-
-    return () => {
-      awareness.off("change", updateCursors);
-    };
-  }, [awareness, flowToScreenPosition, currentLayer, currentGroup]);
-
-  const handleNodesChange = useCallback(
-    (changes: Parameters<typeof onNodesChange>[0]) => {
-      onNodesChange(changes);
-
-      if (awareness) {
-        const selectedNode = changes.find(
-          (c) => c.type === "select" && c.selected,
-        );
-        if (selectedNode && "id" in selectedNode) {
-          awareness.setLocalStateField("selectedNode", selectedNode.id);
-        } else if (changes.some((c) => c.type === "select" && !c.selected)) {
-          awareness.setLocalStateField("selectedNode", null);
-        }
-      }
-    },
-    [onNodesChange, awareness],
-  );
 
   const nodeCategories = useMemo(() => {
     const categories: [string, [string, NodeType][]][] = [];
@@ -199,30 +101,16 @@ export function Viewport() {
 
   return (
     <div ref={reactFlowWrapper} className="relative w-full h-full">
-      {Object.entries(remoteCursors).map(([clientId, pos]) => {
-        const user = connectedUsers.find((u) => u.id === clientId);
-        if (!user) return null;
-        return (
-          <RemoteCursor
-            key={clientId}
-            x={pos.x}
-            y={pos.y}
-            name={user.name}
-            color={user.color}
-          />
-        );
-      })}
       <ContextMenu
         trigger={
           <ReactFlow
             nodes={nodes}
             edges={edges}
-            onNodesChange={handleNodesChange}
+            onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
             onDrop={onDrop}
             onDragOver={onDragOver}
-            onMouseMove={handleMouseMove}
             nodeTypes={nodeTypes}
             colorMode="dark"
             fitView

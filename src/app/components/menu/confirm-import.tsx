@@ -1,4 +1,4 @@
-import { PromptDialog } from "@/ui/prompt-dialog";
+import { Dialog } from "@/ui/dialog";
 import { ImportResult } from "@/utils/project";
 import { Dispatch, SetStateAction } from "react";
 
@@ -12,29 +12,26 @@ export function ConfirmImport({
   setImportResult,
 }: ConfirmImportProps) {
   return (
-    <PromptDialog
+    <Dialog
       trigger={null}
-      title="Import project"
-      description="Some project dependencies are missing"
+      title="Unsupported project"
+      description="This project contains shaders that are not built into this app."
       open={importResult !== undefined}
       onOpenChange={(open) => {
         if (!open) setImportResult(undefined);
       }}
-      onConfirm={importResult?.doImport}
-      confirmText="Import anyway"
     >
       <p className="text-sm/4">
-        This project uses nodes that are currently unavailable:
+        Remove these nodes using the older app before importing:
       </p>
       <ul className="my-4 text-base/5 font-medium">
-        {importResult?.missingDependencies.map((dep) => (
-          <li key={dep.id} className="ml-2">
-            {dep.name}
+        {importResult?.unsupportedNodeTypes.map((type) => (
+          <li key={type} className="ml-2">
+            {type}
           </li>
         ))}
       </ul>
-      <p className="text-sm/4 mb-2">Some layers may not display correctly.</p>
-      <p className="text-sm/4">Import the project anyway?</p>
-    </PromptDialog>
+      <p className="text-sm/4">The current project was not changed.</p>
+    </Dialog>
   );
 }
