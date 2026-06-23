@@ -25,6 +25,10 @@ import multiplyShader from "@/shaders/multiply.wgsl";
 import pixelateShader from "@/shaders/pixelate.wgsl";
 import posterizeShader from "@/shaders/posterize.wgsl";
 import radialGradientShader from "@/shaders/radial-gradient.wgsl";
+import redDilationShader from "@/shaders/red-dilation.wgsl";
+import redErosionShader from "@/shaders/red-erosion.wgsl";
+import redOpeningErodeShader from "@/shaders/red-opening-erode.wgsl";
+import redOpeningDilateShader from "@/shaders/red-opening-dilate.wgsl";
 import sharpnessShader from "@/shaders/sharpness.wgsl";
 import sineShader from "@/shaders/sine.wgsl";
 import sobelShader from "@/shaders/sobel.wgsl";
@@ -775,6 +779,99 @@ export const NODE_TYPES = {
     additionalPasses: [
       {
         shader: openingDilateShader,
+        buffers: [
+          { name: "eroded", type: "color" },
+          { name: "opening_radius", type: "number" },
+        ],
+      },
+    ],
+  },
+  red_erosion: {
+    name: "Red Erosion",
+    category: "material",
+    tooltip:
+      "Erodes only red mask regions. Green, blue, and existing black pixels remain unchanged; removed red pixels become black.",
+    shader: redErosionShader,
+    inputs: {
+      input: {
+        name: "Input",
+        type: "color",
+      },
+      radius: {
+        name: "Radius",
+        type: "number",
+        min: 1,
+        max: 20,
+        step: 1,
+        default: 1,
+      },
+    },
+    outputs: {
+      output: {
+        name: "Output",
+        type: "color",
+      },
+    },
+    parameters: {},
+  },
+  red_dilation: {
+    name: "Red Dilation",
+    category: "material",
+    tooltip:
+      "Expands red mask regions into black pixels without overwriting green or blue pixels.",
+    shader: redDilationShader,
+    inputs: {
+      input: {
+        name: "Input",
+        type: "color",
+      },
+      radius: {
+        name: "Radius",
+        type: "number",
+        min: 1,
+        max: 20,
+        step: 1,
+        default: 1,
+      },
+    },
+    outputs: {
+      output: {
+        name: "Output",
+        type: "color",
+      },
+    },
+    parameters: {},
+  },
+  red_opening: {
+    name: "Red Opening",
+    category: "material",
+    tooltip:
+      "Erodes and then dilates only the red class. It removes small red stragglers while preserving green and blue pixels.",
+    shader: redOpeningErodeShader,
+    inputs: {
+      input: {
+        name: "Input",
+        type: "color",
+      },
+      radius: {
+        name: "Radius",
+        type: "number",
+        min: 1,
+        max: 20,
+        step: 1,
+        default: 1,
+      },
+    },
+    outputs: {
+      output: {
+        name: "Output",
+        type: "color",
+      },
+    },
+    parameters: {},
+    additionalPasses: [
+      {
+        shader: redOpeningDilateShader,
         buffers: [
           { name: "eroded", type: "color" },
           { name: "opening_radius", type: "number" },
