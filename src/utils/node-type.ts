@@ -18,6 +18,10 @@ import fractShader from "@/shaders/fract.wgsl";
 import gaussianBlurEdgeShader from "@/shaders/gaussian-blur-edge.wgsl";
 import gaussianBlurXShader from "@/shaders/gaussian-blur-x.wgsl";
 import gaussianBlurYShader from "@/shaders/gaussian-blur-y.wgsl";
+import greenDilationShader from "@/shaders/green-dilation.wgsl";
+import greenErosionShader from "@/shaders/green-erosion.wgsl";
+import greenOpeningDilateShader from "@/shaders/green-opening-dilate.wgsl";
+import greenOpeningErodeShader from "@/shaders/green-opening-erode.wgsl";
 import saturationShader from "@/shaders/saturation.wgsl";
 import hslShader from "@/shaders/hsl.wgsl";
 import mixShader from "@/shaders/mix.wgsl";
@@ -876,6 +880,100 @@ export const NODE_TYPES = {
           { name: "eroded", type: "color" },
           { name: "opening_radius", type: "number" },
           { name: "removed_red", type: "number" },
+        ],
+      },
+    ],
+  },
+  green_erosion: {
+    name: "Green Erosion",
+    category: "material",
+    tooltip:
+      "Erodes only green mask regions. Removed green pixels become blue; existing red and blue pixels remain unchanged.",
+    shader: greenErosionShader,
+    inputs: {
+      input: {
+        name: "Input",
+        type: "color",
+      },
+      radius: {
+        name: "Radius",
+        type: "number",
+        min: 1,
+        max: 20,
+        step: 1,
+        default: 1,
+      },
+    },
+    outputs: {
+      output: {
+        name: "Output",
+        type: "color",
+      },
+    },
+    parameters: {},
+  },
+  green_dilation: {
+    name: "Green Dilation",
+    category: "material",
+    tooltip:
+      "Expands green mask regions into blue pixels without overwriting red pixels.",
+    shader: greenDilationShader,
+    inputs: {
+      input: {
+        name: "Input",
+        type: "color",
+      },
+      radius: {
+        name: "Radius",
+        type: "number",
+        min: 1,
+        max: 20,
+        step: 1,
+        default: 1,
+      },
+    },
+    outputs: {
+      output: {
+        name: "Output",
+        type: "color",
+      },
+    },
+    parameters: {},
+  },
+  green_opening: {
+    name: "Green Opening",
+    category: "material",
+    tooltip:
+      "Erodes and then dilates only the green class. Removed green becomes blue, while red pixels remain protected.",
+    shader: greenOpeningErodeShader,
+    inputs: {
+      input: {
+        name: "Input",
+        type: "color",
+      },
+      radius: {
+        name: "Radius",
+        type: "number",
+        min: 1,
+        max: 20,
+        step: 1,
+        default: 1,
+      },
+    },
+    outputs: {
+      output: {
+        name: "Output",
+        type: "color",
+      },
+    },
+    parameters: {},
+    additionalPasses: [
+      {
+        shader: greenOpeningDilateShader,
+        buffers: [
+          { name: "eroded", type: "color" },
+          { name: "opening_radius", type: "number" },
+          { name: "removed_green", type: "number" },
         ],
       },
     ],
