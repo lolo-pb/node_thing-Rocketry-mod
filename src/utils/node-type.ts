@@ -40,6 +40,7 @@ import voronoiShader from "@/shaders/voronoi.wgsl";
 import kuwaharaFilterShader from "@/shaders/kuwahara-filter.wgsl";
 
 import materialPosterizerShader from "@/shaders/materials/material-posterizer.wgsl";
+import materialPosterizerMk2Shader from "@/shaders/materials/material-posterizer-mk2.wgsl";
 import houghCircleTransformShader from "@/shaders/materials/hough-circle-transform.wgsl";
 import invertShader from "@/shaders/invert.wgsl";
 import claheShader from "@/shaders/materials/clahe.wgsl";
@@ -67,6 +68,66 @@ export const NODE_TYPES = {
     outputs: {
       output: {
         name: "out",
+        type: "color",
+      },
+    },
+    parameters: {},
+  },
+  material_poster_mk2: {
+    name: "Material Posterizer Mk2",
+    category: "material",
+    tooltip:
+      "Creates a four-color training mask from local luminance statistics. Red is fiber, green is resin, blue is pore, and black is unidentified.",
+    shader: materialPosterizerMk2Shader,
+    inputs: {
+      input: {
+        name: "Input",
+        type: "color",
+      },
+      radius: {
+        name: "Radius",
+        type: "number",
+        default: 4.0,
+        min: 1.0,
+        max: 15.0,
+        step: 1.0,
+      },
+      pore_darkness: {
+        name: "Pore darkness",
+        type: "number",
+        default: 0.04,
+        min: 0.0,
+        max: 0.5,
+        step: 0.005,
+      },
+      fiber_brightness: {
+        name: "Fiber brightness",
+        type: "number",
+        default: 0.04,
+        min: 0.0,
+        max: 0.5,
+        step: 0.005,
+      },
+      minimum_contrast: {
+        name: "Minimum contrast",
+        type: "number",
+        default: 0.0005,
+        min: 0.0,
+        max: 0.1,
+        step: 0.0005,
+      },
+      confidence: {
+        name: "Confidence",
+        type: "number",
+        default: 0.01,
+        min: 0.0,
+        max: 0.1,
+        step: 0.005,
+      },
+    },
+    outputs: {
+      output: {
+        name: "Mask",
         type: "color",
       },
     },
