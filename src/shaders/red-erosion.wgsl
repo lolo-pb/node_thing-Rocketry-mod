@@ -1,10 +1,20 @@
+fn class_color(color: vec3f) -> vec3f {
+    if (color.r > color.g && color.r > color.b) {
+        return vec3f(1.0, 0.0, 0.0);
+    }
+    if (color.b > color.r && color.b > color.g) {
+        return vec3f(0.0, 0.0, 1.0);
+    }
+    return vec3f(0.0, 1.0, 0.0);
+}
+
 fn is_red(color: vec3f) -> bool {
-    return color.r > 0.5 && color.g < 0.5 && color.b < 0.5;
+    return class_color(color).r > 0.5;
 }
 
 fn main(@builtin(global_invocation_id) id: vec3u) {
     if (!is_red(input)) {
-        output[index] = input;
+        output[index] = class_color(input);
         return;
     }
 
@@ -20,5 +30,9 @@ fn main(@builtin(global_invocation_id) id: vec3u) {
         }
     }
 
-    output[index] = select(vec3f(0.0), vec3f(1.0, 0.0, 0.0), keep_red);
+    output[index] = select(
+        vec3f(0.0, 1.0, 0.0),
+        vec3f(1.0, 0.0, 0.0),
+        keep_red
+    );
 }

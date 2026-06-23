@@ -11,8 +11,10 @@ describe("red-only morphology", () => {
     expect(NODE_TYPES.red_opening.category).toBe("material");
     expect(NODE_TYPES.red_erosion).not.toHaveProperty("additionalPasses");
     expect(NODE_TYPES.red_dilation).not.toHaveProperty("additionalPasses");
+    expect(NODE_TYPES.red_erosion.shader).toContain("fn class_color");
+    expect(NODE_TYPES.red_dilation.shader).toContain("fn class_color");
     expect(NODE_TYPES.red_erosion.shader).toContain("if (!is_red(input))");
-    expect(NODE_TYPES.red_dilation.shader).toContain("if (!is_black(input))");
+    expect(NODE_TYPES.red_dilation.shader).toContain("if (!is_green(input))");
   });
 
   it("builds red opening as erosion followed by dilation", () => {
@@ -38,12 +40,16 @@ describe("red-only morphology", () => {
     expect(pipeline.passes[0].outputBindings).toEqual({
       eroded: expect.any(Number),
       opening_radius: expect.any(Number),
+      removed_red: expect.any(Number),
     });
     expect(pipeline.passes[1].inputBindings).toEqual(
       pipeline.passes[0].outputBindings,
     );
     expect(NODE_TYPES.red_opening.shader).toContain(
       "keep_red = keep_red && is_red(raw_input[sample_index])",
+    );
+    expect(NODE_TYPES.red_opening.shader).toContain(
+      "removed_red[index] = select(1.0, 0.0, keep_red)",
     );
     expect(NODE_TYPES.red_opening.additionalPasses[0].shader).toContain(
       "touches_red = touches_red || is_red(raw_eroded[sample_index])",

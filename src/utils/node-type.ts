@@ -790,7 +790,7 @@ export const NODE_TYPES = {
     name: "Red Erosion",
     category: "material",
     tooltip:
-      "Erodes only red mask regions. Green, blue, and existing black pixels remain unchanged; removed red pixels become black.",
+      "Erodes only red mask regions. Removed red pixels become green; existing green, blue, and black pixels remain unchanged.",
     shader: redErosionShader,
     inputs: {
       input: {
@@ -818,7 +818,7 @@ export const NODE_TYPES = {
     name: "Red Dilation",
     category: "material",
     tooltip:
-      "Expands red mask regions into black pixels without overwriting green or blue pixels.",
+      "Expands red mask regions into green pixels without overwriting blue or black pixels.",
     shader: redDilationShader,
     inputs: {
       input: {
@@ -875,6 +875,7 @@ export const NODE_TYPES = {
         buffers: [
           { name: "eroded", type: "color" },
           { name: "opening_radius", type: "number" },
+          { name: "removed_red", type: "number" },
         ],
       },
     ],
