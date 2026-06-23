@@ -9,6 +9,7 @@ import mergeChannelsShader from "@/shaders/combine-channels.wgsl";
 import constantShader from "@/shaders/constant.wgsl";
 import contrastShader from "@/shaders/contrast.wgsl";
 import displaceShader from "@/shaders/displace.wgsl";
+import dilationShader from "@/shaders/dilation.wgsl";
 import edgeTangentFlowShader from "@/shaders/edge-tangent-flow.wgsl";
 import erosionShader from "@/shaders/erosion.wgsl";
 import exposureShader from "@/shaders/exposure.wgsl";
@@ -39,6 +40,8 @@ import perlinNoiseShader from "@/shaders/perlin-noise.wgsl";
 import voronoiNoiseShader from "@/shaders/voronoi-noise.wgsl";
 import voronoiShader from "@/shaders/voronoi.wgsl";
 import kuwaharaFilterShader from "@/shaders/kuwahara-filter.wgsl";
+import openingErodeShader from "@/shaders/opening-erode.wgsl";
+import openingDilateShader from "@/shaders/opening-dilate.wgsl";
 
 import materialPosterizerShader from "@/shaders/materials/material-posterizer.wgsl";
 import materialPosterizerMk2Shader from "@/shaders/materials/material-posterizer-mk2.wgsl";
@@ -713,6 +716,71 @@ export const NODE_TYPES = {
       },
     },
     parameters: {},
+  },
+  dilation: {
+    name: "Dilation",
+    category: "Filter",
+    tooltip:
+      "Replaces each color channel with the maximum value in a square neighborhood. This expands bright regions and shrinks dark regions.",
+    shader: dilationShader,
+    inputs: {
+      input: {
+        name: "Input",
+        type: "color",
+      },
+      radius: {
+        name: "Radius",
+        type: "number",
+        min: 1,
+        max: 20,
+        step: 1,
+        default: 1,
+      },
+    },
+    outputs: {
+      output: {
+        name: "Output",
+        type: "color",
+      },
+    },
+    parameters: {},
+  },
+  opening: {
+    name: "Opening",
+    category: "Filter",
+    tooltip:
+      "Performs erosion followed by dilation using the same square neighborhood. This removes small bright stragglers while restoring surviving regions.",
+    shader: openingErodeShader,
+    inputs: {
+      input: {
+        name: "Input",
+        type: "color",
+      },
+      radius: {
+        name: "Radius",
+        type: "number",
+        min: 1,
+        max: 20,
+        step: 1,
+        default: 1,
+      },
+    },
+    outputs: {
+      output: {
+        name: "Output",
+        type: "color",
+      },
+    },
+    parameters: {},
+    additionalPasses: [
+      {
+        shader: openingDilateShader,
+        buffers: [
+          { name: "eroded", type: "color" },
+          { name: "opening_radius", type: "number" },
+        ],
+      },
+    ],
   },
   gaussBlur: {
     name: "Gaussian blur",
